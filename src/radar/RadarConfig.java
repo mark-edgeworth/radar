@@ -3,8 +3,6 @@
  */
 package radar;
 
-import com.fazecast.jSerialComm.SerialPort;
-
 /**
  *
  */
@@ -17,8 +15,8 @@ public class RadarConfig {
     private int angleComp = 0;
     private int sensitivity = 5;
 
-    private Direction direction;
-    private int reportRate;
+    private Direction direction = Direction.IN;
+    private int reportRate = 1;
 
     /**
      * @param lowerSpeedLimit
@@ -34,7 +32,7 @@ public class RadarConfig {
      *     the angleComp to set (in degrees)
      */
     public void setAngleComp(int angleComp) {
-        this.angleComp = angleComp;
+        this.angleComp = minMax(angleComp, 0, 90);
     }
 
     /**
@@ -75,16 +73,18 @@ public class RadarConfig {
     /**
      * @param radarPort
      */
-    public void sendStatus(SerialPort radarPort) {
+    public void sendStatus(IDevice radarPort) {
         byte[] cmd = new byte[] { (byte) 0x43, (byte) 0x46, (byte) 0x07, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         send(radarPort, cmd);
     }
 
-    public void sendConfig(SerialPort radarPort) {
+    public void sendSetup(IDevice radarPort) {
         byte[] cmd = new byte[] { (byte) 0x43, (byte) 0x46, (byte) 0x01, (byte) lowerSpeedLimitKph, (byte) angleComp,
                 (byte) sensitivity, (byte) 0x0d, (byte) 0x0a };
         send(radarPort, cmd);
+    }
 
+    public void sendConfig(IDevice radarPort) {
         byte directionAsValue = (byte) switch (direction) {
             case IN -> 0;
             case OUT -> 1;
@@ -94,7 +94,7 @@ public class RadarConfig {
         byte reportRateAsValue = (byte) (22 / reportRate - 1);
         byte unit = 0x1; // MPH
 
-        cmd = new byte[] { (byte) 0x43, (byte) 0x46, (byte) 0x02, directionAsValue, reportRateAsValue, unit, (byte) 0x0d,
+        byte[] cmd = new byte[] { (byte) 0x43, (byte) 0x46, (byte) 0x02, directionAsValue, reportRateAsValue, unit, (byte) 0x0d,
                 (byte) 0x0a };
         send(radarPort, cmd);
     }
@@ -103,7 +103,7 @@ public class RadarConfig {
      * @param radarPort
      * @param cmd
      */
-    private void send(SerialPort radarPort, byte[] cmd) {
+    private void send(IDevice radarPort, byte[] cmd) {
         radarPort.writeBytes(cmd, cmd.length);
     }
 }
