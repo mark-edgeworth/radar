@@ -41,10 +41,10 @@ public class MessageListener implements SerialPortMessageListener {
         String message = new String(delimitedMessage, Charset.defaultCharset()).trim();
         System.out.println("Radar module says '" + message + "'");
 
-        out.println("RADAR> " + message);
+        out.println(message);
     }
 
     public void messageToClient(String msg) {
-        out.println("SERVER> " + msg);
+        out.println("S " + msg);
     }
 }
