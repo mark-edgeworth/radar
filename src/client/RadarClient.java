@@ -16,8 +16,8 @@ import java.net.UnknownHostException;
  */
 public class RadarClient {
 
-    private static final String HOSTNAME = "localhost";
-    // private static final String HOSTNAME = "raspberrypi";
+    // private static final String HOSTNAME = "localhost";
+    private static final String HOSTNAME = "raspberrypi";
     private static final int PORT = 9990;
 
     /**

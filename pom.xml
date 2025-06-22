@@ -23,7 +23,7 @@
         <dependency>
             <groupId>com.fazecast</groupId>
             <artifactId>jSerialComm</artifactId>
-            <version>2.11.0</version>
+            <version>2.9.3</version>
         </dependency>
         <!--
         https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
@@ -42,7 +42,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <release>21</release>
+                    <release>17</release>
                 </configuration>
             </plugin>
         </plugins>

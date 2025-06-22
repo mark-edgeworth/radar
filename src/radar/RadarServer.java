@@ -23,18 +23,23 @@ public class RadarServer {
      */
     public static void main(String[] args) {
         System.out.println("Radar Server");
-        new RadarServer(true);
+        if (args.length == 0) {
+            System.out.println("Need one arg: 'console' or 'module'");
+        }
+        new RadarServer(args[0]);
     }
 
-    private RadarServer(boolean useConsole) {
-        String serialPortName = "/dev/serial0";
-
+    private RadarServer(String serialPortName) {
         int serverPort = 9990;
 
         try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
             serverRunning = true;
 
-            IDevice radarDevice = useConsole ? new RadarDeviceConsole() : new RadarDevice(serialPortName);
+            IDevice radarDevice = switch (serialPortName) {
+                case "console" -> new RadarDeviceConsole();
+                case "module" -> new RadarDevice("/dev/serial0");
+                default -> throw new IOException("Illegal argument '" + serialPortName + "'");
+            };
             do {
                 System.out.println("Server is listening for a new client connection on port " + serverPort);
                 try (Socket socket = serverSocket.accept()) {
