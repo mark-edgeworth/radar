@@ -1,21 +1,23 @@
 /**
  *
  */
-package radar;
+package common;
+
+import radar.IDevice;
 
 /**
  *
  */
 public class RadarConfig {
     public enum Direction {
-        IN, OUT, IN_OUT;
+        TOWARDS, AWAY, BOTH;
     }
 
     private int lowerSpeedLimitKph = 1; // In KPH
     private int angleComp = 0;
     private int sensitivity = 5;
 
-    private Direction direction = Direction.IN;
+    private Direction direction = Direction.TOWARDS;
     private int reportRate = 1;
 
     private boolean configChanged = true;
@@ -95,9 +97,9 @@ public class RadarConfig {
 
     public void sendConfig(IDevice radarPort) {
         byte directionAsValue = (byte) switch (direction) {
-            case IN -> 0;
-            case OUT -> 1;
-            case IN_OUT -> 2;
+            case TOWARDS -> 1;
+            case AWAY -> 2;
+            case BOTH -> 0;
         };
 
         byte reportRateAsValue = (byte) (22 / reportRate - 1);
@@ -137,7 +139,7 @@ public class RadarConfig {
         angleComp = 0;
         sensitivity = 5;
 
-        direction = Direction.IN;
+        direction = Direction.TOWARDS;
         reportRate = 1;
 
         configChanged = true;

@@ -10,6 +10,10 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import common.RadarConfig.Direction;
 
 /**
  *
@@ -32,12 +36,14 @@ public class RadarClient {
      *
      */
     public RadarClient(String hostname, int port) {
+        RadarCallback radarCallback = new RadarCallback();
+
         try (Socket socket = new Socket(hostname, port)) {
 
             OutputStream output = socket.getOutputStream();
             PrintWriter writer = new PrintWriter(output, true);
 
-            MessageReader fromServer = new MessageReader(socket);
+            MessageReader fromServer = new MessageReader(socket, radarCallback);
             fromServer.start();
 
             String text;
@@ -61,13 +67,15 @@ public class RadarClient {
     }
 
     class MessageReader extends Thread {
-        private Socket socket;
+        private final Socket socket;
+        private final IResponseCallback callback;
 
         /**
          *
          */
-        public MessageReader(Socket s) {
+        public MessageReader(Socket s, IResponseCallback callback) {
             this.socket = s;
+            this.callback = callback;
         }
 
         @Override
@@ -81,6 +89,8 @@ public class RadarClient {
                         break;
                     }
 
+                    parseResponse(response, callback);
+
                     System.out.println(response);
                 }
 
@@ -88,6 +98,31 @@ public class RadarClient {
             } catch (IOException e) {
                 System.out.println("Client reads interupted: " + e);
             }
+        }
+
+        Pattern speedPattern = Pattern.compile("V([+-])(\\d\\d\\d\\.\\d)");
+
+        /**
+         * @param response
+         * @param callback2
+         */
+        private void parseResponse(String response, IResponseCallback c) {
+            Matcher speedMatcher = speedPattern.matcher(response);
+            if (speedMatcher.matches()) {
+                String direction = speedMatcher.group(1);
+                Direction d = switch (direction) {
+                    case "+" -> Direction.TOWARDS;
+                    case "-" -> Direction.AWAY;
+                    default -> throw new IllegalArgumentException("Invalid direction flag '" + direction + "'");
+                };
+
+                float measurement = Float.parseFloat(speedMatcher.group(2));
+
+                callback.recordSpeed(d, measurement);
+            } else {
+                callback.message(response);
+            }
+
         }
     }
 }

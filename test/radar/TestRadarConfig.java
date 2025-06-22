@@ -7,7 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import radar.RadarConfig.Direction;
+import common.RadarConfig;
+import common.RadarConfig.Direction;
 
 /**
  *
@@ -135,15 +136,15 @@ class TestRadarConfig {
         RadarConfig c = new RadarConfig();
         MockDevice d = new MockDevice();
 
-        c.setDirection(Direction.IN);
+        c.setDirection(Direction.TOWARDS);
         c.sendConfig(d);
         assertEquals("43 46 02 00 15 01 0D 0A", d.toString());
 
-        c.setDirection(Direction.OUT);
+        c.setDirection(Direction.AWAY);
         c.sendConfig(d);
         assertEquals("43 46 02 01 15 01 0D 0A", d.toString());
 
-        c.setDirection(Direction.IN_OUT);
+        c.setDirection(Direction.BOTH);
         c.sendConfig(d);
         assertEquals("43 46 02 02 15 01 0D 0A", d.toString());
     }

@@ -10,7 +10,8 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import radar.RadarConfig.Direction;
+import common.RadarConfig;
+import common.RadarConfig.Direction;
 
 /**
  *
