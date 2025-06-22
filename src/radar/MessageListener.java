@@ -4,7 +4,7 @@
 package radar;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
+import java.nio.charset.Charset;
 
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortEvent;
@@ -38,9 +38,10 @@ public class MessageListener implements SerialPortMessageListener {
     @Override
     public void serialEvent(SerialPortEvent event) {
         byte[] delimitedMessage = event.getReceivedData();
-        System.out.println("Received the following delimited message from the radar module: '" + delimitedMessage + "'");
+        String message = new String(delimitedMessage, Charset.defaultCharset());
+        System.out.println("Radar module says '" + message + "'");
 
-        out.println("RADAR> " + Arrays.toString(delimitedMessage));
+        out.println("RADAR> " + message);
     }
 
     public void messageToClient(String msg) {
