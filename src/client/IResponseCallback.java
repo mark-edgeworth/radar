@@ -25,4 +25,9 @@ public interface IResponseCallback {
      */
     void message(String response);
 
+    /**
+     *
+     */
+    void recordZero();
+
 }

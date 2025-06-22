@@ -90,8 +90,6 @@ public class RadarClient {
                     }
 
                     parseResponse(response, callback);
-
-                    System.out.println(response);
                 }
 
                 interrupt();
@@ -118,7 +116,11 @@ public class RadarClient {
 
                 float measurement = Float.parseFloat(speedMatcher.group(2));
 
-                callback.recordSpeed(d, measurement);
+                if (measurement > 0.1f) {
+                    callback.recordSpeed(d, measurement);
+                } else if (measurement == 0) {
+                    callback.recordZero();
+                }
             } else {
                 callback.message(response);
             }
