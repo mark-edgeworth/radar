@@ -6,7 +6,7 @@ package radar;
 /**
  *
  */
-public interface IDevice {
+public interface IDevice extends AutoCloseable {
 
     /**
      * @param cmd
@@ -24,4 +24,11 @@ public interface IDevice {
      */
     void removeDataListener();
 
+    @Override
+    void close();
+
+    /**
+     * @return
+     */
+    boolean open();
 }

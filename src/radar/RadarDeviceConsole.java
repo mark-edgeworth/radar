@@ -3,6 +3,8 @@
  */
 package radar;
 
+import java.io.IOException;
+
 /**
  * Concrete implementation of the radar device.
  */
@@ -12,7 +14,8 @@ public class RadarDeviceConsole implements IDevice {
      * @param radarPort
      *
      */
-    public RadarDeviceConsole() {
+    public RadarDeviceConsole() throws IOException {
+        // Nothing
     }
 
     @Override
@@ -22,10 +25,12 @@ public class RadarDeviceConsole implements IDevice {
 
     @Override
     public void addDataListener(MessageListener listener) {
+        // Do nothing
     }
 
     @Override
     public void removeDataListener() {
+        // Do nothing
     }
 
     private String btos(byte[] cmd) {
@@ -35,6 +40,16 @@ public class RadarDeviceConsole implements IDevice {
         }
 
         return sb.toString().trim();
+    }
+
+    @Override
+    public void close() {
+        // Nothing
+    }
+
+    @Override
+    public boolean open() {
+        return true;
     }
 
 }

@@ -53,6 +53,18 @@ class TestRadarConfig {
 
             return sb.toString().trim();
         }
+
+        @Override
+        public void close() {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public boolean open() {
+            // TODO Auto-generated method stub
+            return false;
+        }
     }
 
     @Test

@@ -3,20 +3,19 @@
  */
 package radar;
 
-import java.io.BufferedOutputStream;
-import java.io.IOException;
+import java.io.PrintWriter;
 
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortEvent;
 import com.fazecast.jSerialComm.SerialPortMessageListener;
 
 public class MessageListener implements SerialPortMessageListener {
-    private BufferedOutputStream out;
+    private PrintWriter out;
 
     /**
      * @param out
      */
-    public MessageListener(BufferedOutputStream out) {
+    public MessageListener(PrintWriter out) {
         this.out = out;
     }
 
@@ -40,10 +39,6 @@ public class MessageListener implements SerialPortMessageListener {
         byte[] delimitedMessage = event.getReceivedData();
         System.out.println("Received the following delimited message from the radar module: '" + delimitedMessage + "'");
 
-        try {
-            out.write(delimitedMessage);
-        } catch (IOException e) {
-            System.err.println("Unable to send radar response: " + e.getMessage());
-        }
+        out.println("Message from radar: " + delimitedMessage);
     }
 }

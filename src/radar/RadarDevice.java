@@ -3,6 +3,8 @@
  */
 package radar;
 
+import java.io.IOException;
+
 import com.fazecast.jSerialComm.SerialPort;
 
 /**
@@ -14,10 +16,14 @@ public class RadarDevice implements IDevice {
 
     /**
      * @param radarPort
+     * @throws IOException
      *
      */
-    public RadarDevice(SerialPort radarPort) {
-        port = radarPort;
+    public RadarDevice(String serialPortName) throws IOException {
+        port = SerialPort.getCommPort(serialPortName);
+        if (!port.openPort()) {
+            throw new IOException("Failed to open serial port");
+        }
     }
 
     @Override
@@ -33,6 +39,16 @@ public class RadarDevice implements IDevice {
     @Override
     public void removeDataListener() {
         port.removeDataListener();
+    }
+
+    @Override
+    public void close() {
+        port.closePort();
+    }
+
+    @Override
+    public boolean open() {
+        return port.openPort();
     }
 
 }
