@@ -18,6 +18,9 @@ public class RadarConfig {
     private Direction direction = Direction.IN;
     private int reportRate = 1;
 
+    private boolean configChanged = true;
+    private boolean setupChanged = true;
+
     /**
      * @param lowerSpeedLimit
      *     the lowerSpeedLimit to set (in mph, between 1-60)
@@ -25,6 +28,7 @@ public class RadarConfig {
     public void setLowerSpeedLimit(int newLowerSpeedLimitMph) {
 
         lowerSpeedLimitKph = minMax((int) (newLowerSpeedLimitMph * 1.609f), 1, 100);
+        setupChanged = true;
     }
 
     /**
@@ -33,6 +37,7 @@ public class RadarConfig {
      */
     public void setAngleComp(int angleComp) {
         this.angleComp = minMax(angleComp, 0, 90);
+        setupChanged = true;
     }
 
     /**
@@ -41,6 +46,7 @@ public class RadarConfig {
      */
     public void setSensitivity(int newSensitivity) {
         sensitivity = minMax(newSensitivity, 1, 15);
+        setupChanged = true;
     }
 
     /**
@@ -49,6 +55,7 @@ public class RadarConfig {
      */
     public void setDirection(Direction direction) {
         this.direction = direction;
+        configChanged = true;
     }
 
     /**
@@ -58,6 +65,7 @@ public class RadarConfig {
     public void setReportRate(int reportRate) {
 
         this.reportRate = minMax(reportRate, 1, 22);
+        configChanged = true;
     }
 
     private int minMax(int value, int min, int max) {
@@ -82,6 +90,7 @@ public class RadarConfig {
         byte[] cmd = new byte[] { (byte) 0x43, (byte) 0x46, (byte) 0x01, (byte) lowerSpeedLimitKph, (byte) angleComp,
                 (byte) sensitivity, (byte) 0x0d, (byte) 0x0a };
         send(radarPort, cmd);
+        setupChanged = false;
     }
 
     public void sendConfig(IDevice radarPort) {
@@ -97,6 +106,7 @@ public class RadarConfig {
         byte[] cmd = new byte[] { (byte) 0x43, (byte) 0x46, (byte) 0x02, directionAsValue, reportRateAsValue, unit, (byte) 0x0d,
                 (byte) 0x0a };
         send(radarPort, cmd);
+        configChanged = false;
     }
 
     /**
@@ -105,5 +115,32 @@ public class RadarConfig {
      */
     private void send(IDevice radarPort, byte[] cmd) {
         radarPort.writeBytes(cmd, cmd.length);
+    }
+
+    /**
+     *
+     */
+    public void update(IDevice radarPort, boolean force) {
+        if (setupChanged || force) {
+            sendSetup(radarPort);
+        }
+        if (configChanged || force) {
+            sendConfig(radarPort);
+        }
+    }
+
+    /**
+     * @return
+     */
+    public void reset() {
+        lowerSpeedLimitKph = 1; // In KPH
+        angleComp = 0;
+        sensitivity = 5;
+
+        direction = Direction.IN;
+        reportRate = 1;
+
+        configChanged = true;
+        setupChanged = true;
     }
 }

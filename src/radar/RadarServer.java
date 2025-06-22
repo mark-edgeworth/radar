@@ -10,6 +10,8 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import radar.RadarConfig.Direction;
+
 /**
  *
  */
@@ -61,7 +63,7 @@ public class RadarServer {
             RadarConfig config = new RadarConfig();
 
             radarPort.addDataListener(listener);
-            processRequestsFromClient(radarPort, rIn, bOut, config);
+            processRequestsFromClient(radarPort, rIn, listener, config);
             radarPort.removeDataListener();
         } catch (IOException e) {
             System.err.println("Connection terminated with an error: " + e.getMessage());
@@ -76,29 +78,69 @@ public class RadarServer {
      * @return
      * @throws IOException
      */
-    private void processRequestsFromClient(IDevice radarPort, BufferedReader fromClient, PrintWriter toClient, RadarConfig config)
-            throws IOException {
+    private void processRequestsFromClient(IDevice radarPort, BufferedReader fromClient, MessageListener toClient,
+            RadarConfig config) throws IOException {
         boolean exit = false;
         do {
             String command = fromClient.readLine();
             if (command == null) {
                 exit = true;
             } else if (!command.isBlank()) {
-                toClient.println("Command '" + command + "' received");
+                toClient.messageToClient("Command '" + command + "' received");
                 switch (command.charAt(0)) {
                     case 'C' -> config.sendConfig(radarPort);
                     case 'S' -> config.sendSetup(radarPort);
+                    case 'U' -> config.update(radarPort, true);
+                    case 'R' -> {
+                        config.reset();
+                        config.update(radarPort, true);
+                    }
                     case '?' -> config.sendStatus(radarPort);
                     case 'X' -> exit = true;
+                    case 'V' -> toClient.messageToClient(setValue(radarPort, command, config));
                     case 'T' -> {
                         serverRunning = false;
                         exit = true;
                     }
                     default -> {
-                        toClient.println("Command '" + command + "' ignored");
+                        toClient.messageToClient("Command '" + command + "' ignored");
                     }
                 }
             }
         } while (!exit);
+    }
+
+    /**
+     * @param command
+     * @param config
+     * @return
+     */
+    private String setValue(IDevice radarPort, String command, RadarConfig config) {
+        String[] parts = command.split(" ");
+
+        if (parts.length != 3) {
+            return "Invalid value setting";
+        }
+
+        String param = parts[1];
+        String value = parts[2];
+        String error = null;
+        try {
+            switch (param) {
+                case "limit" -> config.setLowerSpeedLimit(Integer.parseInt(value));
+                case "sens" -> config.setSensitivity(Integer.parseInt(value));
+                case "direction" -> config.setDirection(Direction.valueOf(value));
+                default -> error = "Unrecognised parameter '" + param + "'";
+            }
+        } catch (Throwable t) {
+            error = "Value setting failed: " + t;
+        }
+
+        if (error == null) {
+            config.update(radarPort, false);
+            error = "Setting '%s' to '%s'".formatted(param, value);
+        }
+
+        return error;
     }
 }
