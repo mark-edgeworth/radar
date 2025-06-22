@@ -38,7 +38,7 @@ public class MessageListener implements SerialPortMessageListener {
     @Override
     public void serialEvent(SerialPortEvent event) {
         byte[] delimitedMessage = event.getReceivedData();
-        String message = new String(delimitedMessage, Charset.defaultCharset());
+        String message = new String(delimitedMessage, Charset.defaultCharset()).trim();
         System.out.println("Radar module says '" + message + "'");
 
         out.println("RADAR> " + message);

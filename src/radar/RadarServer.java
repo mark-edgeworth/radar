@@ -35,23 +35,25 @@ public class RadarServer {
         try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
             serverRunning = true;
 
-            IDevice radarDevice = switch (serialPortName) {
+            try (IDevice radarDevice = switch (serialPortName) {
                 case "console" -> new RadarDeviceConsole();
                 case "module" -> new RadarDevice("/dev/serial0");
                 default -> throw new IOException("Illegal argument '" + serialPortName + "'");
-            };
-            do {
-                System.out.println("Server is listening for a new client connection on port " + serverPort);
-                try (Socket socket = serverSocket.accept()) {
-                    System.out.println("New client connected");
-                    if (radarDevice.open()) {
-                        handleConnection(radarDevice, socket);
-                    } else {
-                        System.err.println("Unable to open connection to radar module");
+            }) {
+
+                do {
+                    System.out.println("Server is listening for a new client connection on port " + serverPort);
+                    try (Socket socket = serverSocket.accept()) {
+                        System.out.println("New client connected");
+                        if (radarDevice.open()) {
+                            handleConnection(radarDevice, socket);
+                        } else {
+                            System.err.println("Unable to open connection to radar module");
+                        }
                     }
-                }
-            } while (serverRunning);
-            System.out.println("Server stopped");
+                } while (serverRunning);
+                System.out.println("Server stopped");
+            }
         } catch (IOException e) {
             System.err.println("Server terminated with an error: " + e.getMessage());
         }
@@ -134,7 +136,8 @@ public class RadarServer {
             switch (param) {
                 case "limit" -> config.setLowerSpeedLimit(Integer.parseInt(value));
                 case "sens" -> config.setSensitivity(Integer.parseInt(value));
-                case "direction" -> config.setDirection(Direction.valueOf(value));
+                case "dir" -> config.setDirection(Direction.valueOf(value));
+                case "rate" -> config.setReportRate(Integer.parseInt(value));
                 default -> error = "Unrecognised parameter '" + param + "'";
             }
         } catch (Throwable t) {
